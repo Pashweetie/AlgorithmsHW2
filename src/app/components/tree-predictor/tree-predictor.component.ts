@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { stringify } from '@angular/compiler/src/util';
 import { throwError } from 'rxjs';
+// import { platform } from 'os';
 // import { isWorker } from 'cluster';
 
 interface TreeNode{
@@ -41,7 +42,7 @@ export class TreePredictorComponent implements OnInit {
       console.log(this.wordArray);
       let val = 0;
       this.wordArray.forEach(element => {
-        console.log(val);
+        console.log('iteration: ',val,' root ', this.root);
         this.root = this.addToTree(element.toLowerCase(),this.root,this.root);
         val++;
       });
@@ -84,24 +85,35 @@ export class TreePredictorComponent implements OnInit {
     }
   }
   addToTree(val: string, node: TreeNode, root){
-    console.log(val);       
+    // node.children = new Array(26);
+    // console.log('root',root);
+         
     let arr = val.split('');         
-    let nextChild =val.charCodeAt(0)%26;    
-    node.children = new Array(26);
-    if(val.charCodeAt(0)<=123&&val.charCodeAt(0)>=97){
+    let nextChild =val.charCodeAt(0)%26;
+    node.children[nextChild] = {
+      val: null,
+      isWord: null,
+      children: new Array(26),
+    }    
+    // node.children = new Array(26);
+    if((val.charCodeAt(0)<=123&&val.charCodeAt(0)>=97)){
       if(node.val === null){
+        
         node.val = arr[0];
-        // node.children = new Array(26);
+        node.children = new Array(26);
         node.isWord = true;
+        console.log('created new node ', node);
         return root;
-      }else{
-        node.children[nextChild] = {
-          val: null,
-          isWord: null,
-          children: null,
-        }
-        this.addToTree(val.substr(1),node.children[nextChild],root);
+      }else if(val.length === 1){
+        console.log('repeated word');
+        return root;
+      }else{                
+        
+        this.addToTree(val.substr(1),node.children[nextChild],root);        
       }
+      console.log('val ',val);       
+      console.log('children ',node.children);       
+      console.log('this val ',node.val);  
     }else{
       console.error('value not supported in prediction software',val.charCodeAt(0));
       
